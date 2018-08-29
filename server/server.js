@@ -4,9 +4,39 @@ var loopback = require('loopback');
 var boot = require('loopback-boot');
 var helmet = require('helmet')
 require('dotenv').config()
+var express = require('express');
+var session = require('express-session');
+var MongoDBStore = require('connect-mongodb-session')(session);
 
 var app = module.exports = loopback();
 app.use(helmet());
+
+var store = new MongoDBStore({
+  uri: process.env.DB_URI,
+  collection: 'sessions'
+});
+
+store.on('connected', function() {
+  store.client; // The underlying MongoClient object from the MongoDB driver
+});
+
+// Catch errors
+store.on('error', function(error) {
+  assert.ifError(error);
+  assert.ok(false);
+});
+
+app.use(require('express-session')({
+  secret: 'The secret to these sessions',
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+  },
+  store: store,
+  resave: true,
+  saveUninitialized: true
+}));
+
+
 app.start = function() {
   // start the web server
   return app.listen(function() {
