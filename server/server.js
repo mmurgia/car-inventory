@@ -3,9 +3,9 @@
 var loopback = require('loopback');
 var boot = require('loopback-boot');
 var helmet = require('helmet')
+require('dotenv').config()
 
 var app = module.exports = loopback();
-
 app.use(helmet());
 app.start = function() {
   // start the web server
